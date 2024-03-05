@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+    db:
+      image: mysql:latest
+      command: --innodb-use-native-aio=0
+      container_name: db
+      restart: always
+      tty: true 
+      environment:
+        - MYSQL_DATABASE=nodedb
+        - MYSQL_ROOT_PASSWORD=root
+      networks:
+        - fullcycle-network
+      volumes:
+        - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+        interval: 5s
+        timeout: 10s
+        retries: 3
+
+    app:
+      image: andressagonelli/app-node
+      build: 
+        context: node
+        dockerfile: Dockerfile.prod
+      container_name: app
+      networks:
+        - fullcycle-network
+      tty: true
+      restart: always
+      depends_on:
+        db:
+          condition: service_healthy
+
+    nginx:
+      image: andressagonelli/nginx-node
+      build:
+        context: ./nginx
+      container_name: nginx
+      restart: always
+      networks:
+        - fullcycle-network
+      ports:
+        - "8080:80"
+      depends_on: 
+        - "app"
+    
+networks:
+  fullcycle-network:
+    driver: bridge
+      
