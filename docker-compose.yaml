@@ -22,17 +22,25 @@ services:
 
     app:
       image: andressagonelli/app-node
+      build:
+        context: node
+        dockerfile: Dockerfile.prod
       container_name: app
       networks:
         - fullcycle-network
       tty: true
       restart: always
+      entrypoint: sh -c "npm install && npm start"
+      volumes:
+       - ./node:/usr/src/app
       depends_on:
         db:
           condition: service_healthy
 
     nginx:
       image: andressagonelli/nginx-node
+      build:
+        context: ./nginx
       container_name: nginx
       restart: always
       networks:
