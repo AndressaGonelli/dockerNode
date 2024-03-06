@@ -8,7 +8,7 @@ docker-compose up -d
 ```
 ## Para rodar e reconstruir as imagens
 ``` bash
-docker-compose -f ./docker-compose-dev.yaml up --build 
+docker-compose up --build 
 ```
 
 ## Para subir as imagens geradas para o docker hub
